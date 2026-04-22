@@ -6,8 +6,11 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.json({});
   const session = await getIronSession(req, res, sessionOptions);
   
-  if (session.user) {
-    return NextResponse.json({ user: session.user });
+  // Type assertion ашиглах
+  const user = (session as any).user;
+  
+  if (user) {
+    return NextResponse.json({ user: user });
   }
   
   return NextResponse.json({ user: null });
