@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from './app/lib/auth';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
   const session = await getIronSession(req, res, sessionOptions);
   const user = (session as any).user;
