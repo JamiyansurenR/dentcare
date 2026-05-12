@@ -12,7 +12,7 @@ interface Doctor {
   phone: string;
   experience: number;
   description: string;
-  
+   rating: number; 
   active: boolean;
 }
 
