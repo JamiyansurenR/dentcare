@@ -17,9 +17,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Нэвтрэх нэр эсвэл нууц үг буруу' }, { status: 401 });
     }
     
-   // ✅ bcrypt ашиглан нууц үг харьцуулах
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    // bcrypt-г түр хасаад энгийн харьцуулалт хийх
+    if (password !== user.password) {
       return NextResponse.json({ error: 'Нэвтрэх нэр эсвэл нууц үг буруу' }, { status: 401 });
     }
     
