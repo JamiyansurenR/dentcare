@@ -192,25 +192,11 @@ export default function BookingPage() {
       value={selectedDate}
       onChange={(e) => setSelectedDate(e.target.value)}
       min={new Date().toISOString().split('T')[0]}
-      max={new Date(Date.now() + 155 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+      max={new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]}
       className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
       aria-label="Огноо сонгох"
     />
-    <div className="flex gap-3 mt-6">
-      <button
-        onClick={() => setStep(1)}
-        className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition"
-      >
-        Буцах
-      </button>
-      <button
-        onClick={() => setStep(3)}
-        disabled={!selectedDate}
-        className="flex-1 bg-teal-600 text-white py-3 rounded-xl font-semibold hover:bg-teal-700 disabled:opacity-50 transition"
-      >
-        Үргэлжлүүлэх
-      </button>
-    </div>
+    {/* ... бусад код ... */}
   </div>
 )}
 
