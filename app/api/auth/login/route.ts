@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
     );
     const user = rows[0];
     
-    if (!user) {
+  console.log('User from DB:', user);
+console.log('Password from DB:', user?.password); 
+  if (!user) {
       return NextResponse.json({ error: 'Нэвтрэх нэр, утас эсвэл нууц үг буруу' }, { status: 401 });
     }
     
@@ -28,7 +30,7 @@ export async function POST(req: NextRequest) {
     if (!isPasswordValid) {
       return NextResponse.json({ error: 'Нэвтрэх нэр, утас эсвэл нууц үг буруу' }, { status: 401 });
     }
-    
+
     const res = NextResponse.json({ 
       success: true, 
       role: user.role,
