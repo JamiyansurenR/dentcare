@@ -1,16 +1,12 @@
 import mysql from 'mysql2/promise';
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT) || 4000,
+  host: 'localhost',
+  user: 'root',
+  password: 'root1234',  // Хэрэв нууц үгтэй бол энд бичнэ
+  database: 'dentist_booking',
   waitForConnections: true,
   connectionLimit: 10,
-  ssl: {
-    rejectUnauthorized: true
-  }
 });
 
 export default pool;

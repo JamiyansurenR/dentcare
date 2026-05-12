@@ -8,7 +8,8 @@ import {
   UsersIcon,
   CalendarIcon,
   ChartBarIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
@@ -107,6 +108,11 @@ export default function AdminPage() {
             <p className="text-3xl font-bold text-teal-600 mt-2"></p>
             <p className="text-sm text-gray-500 mt-1">Эмчийн үзлэгийн тоо, ачаалалтай өдөр, цаг</p>
           </Link>
+          <Link href="/admin/reviews" className="block bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition group">
+  <StarIcon className="w-10 h-10 text-yellow-500 group-hover:scale-110 transition" />
+  <h2 className="text-lg font-semibold text-gray-800 mt-3"> Үнэлгээ</h2>
+  <p className="text-sm text-gray-500 mt-1">Эмчийн үнэлгээ, сэтгэгдлүүд</p>
+</Link>
         </div>
       </div>
     </div>

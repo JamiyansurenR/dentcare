@@ -12,7 +12,7 @@ interface Doctor {
   phone: string;
   experience: number;
   description: string;
-  rating: number;
+  
   active: boolean;
 }
 
@@ -30,16 +30,29 @@ export default function AdminDoctorsPage() {
     experience: 0,
     description: '',
     active: true,
+    
   });
   const router = useRouter();
 
-  const fetchDoctors = async () => {
-    const res = await fetch('/api/admin/doctors');
-    if (res.status === 401) router.push('/admin/login');
+ const fetchDoctors = async () => {
+  setLoading(true);
+  try {
+    const res = await fetch('/api/admin/doctors', { cache: 'no-store' });
     const data = await res.json();
-    setDoctors(data);
+    
+    const doctorsWithNumberRating = data.map((d: any) => ({
+      ...d,
+      rating: typeof d.rating === 'string' ? parseFloat(d.rating) : d.rating
+    }));
+    
+    console.log('Setting doctors:', doctorsWithNumberRating);
+    setDoctors([...doctorsWithNumberRating]); // шинэ array
+  } catch (err) {
+    console.error('Fetch error:', err);
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   useEffect(() => {
     fetchDoctors();
@@ -50,17 +63,19 @@ export default function AdminDoctorsPage() {
     const url = editingDoctor ? '/api/admin/doctors' : '/api/admin/doctors';
     const method = editingDoctor ? 'PUT' : 'POST';
     const body = editingDoctor ? { ...formData, doctorId: editingDoctor.doctor_id } : formData;
-
+console.log('Sending body:', body);
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
+     const data = await res.json();
+  console.log('Response:', data);
     if (res.ok) {
-      fetchDoctors();
+      await fetchDoctors();
       setShowModal(false);
       setEditingDoctor(null);
-      setFormData({ firstName: '', lastName: '', specialization: '', email: '', phone: '', experience: 0, description: '', active: true });
+      setFormData({ firstName: '', lastName: '', specialization: '', email: '', phone: '', experience: 0, description: '', active: true, });
     } else {
       alert('Алдаа гарлаа');
     }
@@ -74,6 +89,7 @@ export default function AdminDoctorsPage() {
   };
 
   const editDoctor = (doctor: Doctor) => {
+
     setEditingDoctor(doctor);
     setFormData({
       firstName: doctor.first_name,
@@ -84,6 +100,7 @@ export default function AdminDoctorsPage() {
       experience: doctor.experience,
       description: doctor.description,
       active: doctor.active,
+      
     });
     setShowModal(true);
   };
@@ -104,7 +121,7 @@ export default function AdminDoctorsPage() {
           <span>Буцах</span>
         </button>
           <h1 className="text-2xl font-bold"> Эмч нарын бүртгэл</h1>
-          <button onClick={() => { setEditingDoctor(null); setFormData({ firstName: '', lastName: '', specialization: '', email: '', phone: '', experience: 0, description: '', active: true }); setShowModal(true); }} className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 flex items-center gap-2">
+          <button onClick={() => { setEditingDoctor(null); setFormData({ firstName: '', lastName: '', specialization: '', email: '', phone: '', experience: 0, description: '', active: true,  }); setShowModal(true); }} className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 flex items-center gap-2">
             <PlusIcon className="w-5 h-5" /> Шинэ эмч
           </button>
         </div>
@@ -112,7 +129,16 @@ export default function AdminDoctorsPage() {
         <div className="bg-white rounded-xl shadow overflow-hidden">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">
-              <tr><th className="p-3">Нэр</th><th className="p-3">Мэргэжил</th><th className="p-3">Имэйл</th><th className="p-3">Утас</th><th className="p-3">Туршлага</th><th className="p-3">Үйлдэл</th></tr></thead>
+              <tr>
+        <th className="p-3 text-left">Нэр</th>
+        <th className="p-3 text-left">Мэргэжил</th>
+        <th className="p-3 text-left">Имэйл</th>
+        <th className="p-3 text-left">Утас</th>
+        <th className="p-3 text-left">Туршлага</th>
+        <th className="p-3 text-left">Үнэлгээ</th>
+        <th className="p-3 text-left">Төлөв</th>
+        <th className="p-3 text-left">Үйлдэл</th>
+      </tr></thead>
             <tbody>
               {doctors.map(doc => (
                 <tr key={doc.doctor_id} className="border-t hover:bg-gray-50">
@@ -121,6 +147,12 @@ export default function AdminDoctorsPage() {
                   <td className="p-3">{doc.email}</td>
                   <td className="p-3">{doc.phone}</td>
                   <td className="p-3">{doc.experience} жил</td>
+                 <td className="p-3">{doc.rating ? doc.rating.toFixed(1) : '0'} ★</td>
+                   <td className="p-3">
+        <span className={`px-2 py-1 text-xs rounded-full ${doc.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          {doc.active ? 'Идэвхтэй' : 'Идэвхгүй'}
+        </span>
+      </td>
                   <td className="p-3 flex gap-2">
                     <button onClick={() => editDoctor(doc)} className="text-blue-500 hover:text-blue-700" aria-label="Засварлах"><PencilIcon className="w-5 h-5" /></button>
                     <button onClick={() => deleteDoctor(doc.doctor_id)} className="text-red-500 hover:text-red-700" aria-label="Устгах"><TrashIcon className="w-5 h-5" /></button>
@@ -142,6 +174,7 @@ export default function AdminDoctorsPage() {
                 <input type="email" placeholder="Имэйл" className="w-full border rounded-lg p-2" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                 <input type="tel" placeholder="Утас" className="w-full border rounded-lg p-2" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                 <input type="number" placeholder="Туршлага (жил)" className="w-full border rounded-lg p-2" value={formData.experience} onChange={e => setFormData({ ...formData, experience: parseInt(e.target.value) })} />
+     
                 <textarea placeholder="Тайлбар" className="w-full border rounded-lg p-2" rows={2} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                 <label className="flex items-center gap-2"><input type="checkbox" checked={formData.active} onChange={e => setFormData({ ...formData, active: e.target.checked })} /> Идэвхтэй</label>
                 <div className="flex gap-2 pt-2">

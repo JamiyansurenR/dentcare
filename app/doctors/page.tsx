@@ -14,7 +14,12 @@ async function getDoctors(page: number = 1, limit: number = 9) {
     [limit, offset]
   );
   const [countRows] = await pool.query<any[]>('SELECT COUNT(*) as count FROM doctors WHERE active = true');
-  return { doctors: rows, total: countRows[0]?.count || 0 };
+  
+  const doctors = rows.map((d: any) => ({ 
+    ...d, 
+    rating: d.rating ? parseFloat(d.rating) : 0 
+  }));
+  return { doctors, total: countRows[0]?.count || 0 };
 }
 
 export default async function DoctorsPage({
@@ -67,9 +72,9 @@ export default async function DoctorsPage({
                     {/* Үнэлгээний од - Icon-оор сольсон */}
                     <div className="flex items-center justify-center mt-2 space-x-2">
                       <div className="flex items-center gap-1">
-                        <StarIcon className="w-3 h-3 text-yellow-400" />
-                        <span className="text-xs text-gray-600">{doctor.rating || 'Шинэ'}</span>
-                      </div>
+  <StarIcon className="w-4 h-4 text-yellow-400" />
+  <span className="text-sm text-gray-700">{doctor.rating ? doctor.rating.toFixed(1) : 'Шинэ'}</span>
+</div>
                       <span className="text-gray-300 text-xs">•</span>
                       <span className="text-gray-400 text-xs">{doctor.experience} жил</span>
                     </div>

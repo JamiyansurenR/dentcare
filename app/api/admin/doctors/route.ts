@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
        JOIN profiles p ON d.profile_id = p.profile_id
        ORDER BY d.doctor_id`
     );
-    
+    console.log('Rating type:', typeof rows[0]?.rating);
     return NextResponse.json(rows);
   } catch (error: any) {
     console.error('GET doctors error:', error);
@@ -86,8 +86,8 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Хандах эрхгүй' }, { status: 401 });
     }
 
-    const { doctorId, firstName, lastName, specialization, email, phone, experience, description, active } = await req.json();
-
+    const { doctorId, firstName, lastName, specialization, email, phone, experience, description, active,rating } = await req.json();
+console.log('Updating doctor:', { doctorId, rating });
     await pool.query(
       `UPDATE profiles p
        JOIN doctors d ON p.profile_id = d.profile_id
@@ -96,7 +96,7 @@ export async function PUT(req: NextRequest) {
        WHERE d.doctor_id = ?`,
       [firstName, lastName, email, phone, specialization, experience, description, active, doctorId]
     );
-
+ console.log('✅ Doctor rating updated successfully');
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('PUT doctor error:', error);
@@ -112,9 +112,8 @@ export async function DELETE(req: NextRequest) {
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Хандах эрхгүй' }, { status: 401 });
     }
-
-    const { searchParams } = new URL(req.url);
-    const doctorId = searchParams.get('doctorId');
+const { doctorId, firstName, lastName, specialization, email, phone, experience, description, active, rating } = await req.json();
+   
 
     if (!doctorId) {
       return NextResponse.json({ error: 'doctorId шаардлагатай' }, { status: 400 });

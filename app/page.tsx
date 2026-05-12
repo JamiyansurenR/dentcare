@@ -14,7 +14,10 @@ async function getDoctors() {
       WHERE d.active = true
       LIMIT 3
     `);
-    return rows;
+    return rows.map((d: any) => ({ 
+      ...d, 
+      rating: parseFloat(d.rating) || 0
+    }));
   } catch (error) {
     console.error('Doctors error:', error);
     return [];
@@ -140,9 +143,9 @@ export default async function Home() {
                   <p className="text-gray-500 text-xs mt-2 line-clamp-2">{doctor.description}</p>
                   <div className="flex items-center justify-center mt-3 space-x-3">
                     <div className="flex items-center gap-1">
-                      <StarIcon className="w-4 h-4 text-yellow-400" />
-                      <span className="text-sm text-gray-700">{doctor.rating || 'Шинэ'}</span>
-                    </div>
+  <StarIcon className="w-4 h-4 text-yellow-400" />
+  <span className="text-sm text-gray-700">{doctor.rating > 0 ? doctor.rating.toFixed(1) : 'Шинэ'}</span>
+</div>
                     <span className="text-gray-300 text-xs">•</span>
                     <div className="flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4 text-gray-400" />

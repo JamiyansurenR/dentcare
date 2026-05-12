@@ -11,7 +11,8 @@ import {
   XMarkIcon,
   CheckIcon,
   ExclamationTriangleIcon,
-  UserCircleIcon 
+  UserCircleIcon ,
+   StarIcon 
 } from '@heroicons/react/24/outline';
 
 interface Appointment {
@@ -35,6 +36,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [cancelling, setCancelling] = useState<number | null>(null);
+   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
   const router = useRouter();
 
   const fetchAppointments = async () => {
@@ -81,6 +87,42 @@ export default function DashboardPage() {
       alert('Серверт холбогдоход алдаа гарлаа');
     } finally {
       setCancelling(null);
+    }
+  };
+const openReviewModal = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setReviewRating(5);
+    setReviewComment('');
+    setShowReviewModal(true);
+  };
+
+  const submitReview = async () => {
+    if (!selectedAppointment) return;
+    
+    setSubmittingReview(true);
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointmentId: selectedAppointment.appointment_id,
+          rating: reviewRating,
+          comment: reviewComment
+        })
+      });
+      
+      if (res.ok) {
+        alert('Үнэлгээ амжилттай хадгалагдлаа. Баярлалаа!');
+        setShowReviewModal(false);
+        fetchAppointments(); // жагсаалтыг шинэчлэх
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Үнэлгээ хадгалахад алдаа гарлаа');
+      }
+    } catch (err) {
+      alert('Серверт холбогдоход алдаа гарлаа');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -252,6 +294,14 @@ export default function DashboardPage() {
                         {apt.status === 'cancelled' && (
                           <span className="text-gray-400 text-sm">Цуцлагдсан</span>
                         )}
+                        {apt.status === 'completed' && (
+                          <button
+                            onClick={() => openReviewModal(apt)}
+                            className="bg-yellow-200 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
+                          >
+                             Үнэлэх
+                          </button>
+                        )}
                         {apt.status !== 'pending' && apt.status !== 'cancelled' && (
                           <span className="text-gray-400 text-sm">-</span>
                         )}
@@ -264,6 +314,66 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+       {/*  ҮНЭЛГЭЭНИЙ MODAL */}
+      {showReviewModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Эмчид үнэлгээ өгөх</h2>
+            <p className="text-gray-600 mb-4">
+              Dr. {selectedAppointment.doctor_first_name} {selectedAppointment.doctor_last_name}
+            </p>
+            
+            {/* Оддын үнэлгээ */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Үнэлгээ</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    className="focus:outline-none"
+                    aria-label={`${star} од`}
+                  >
+                    <StarIcon 
+                      className={`w-8 h-8 ${star <= reviewRating ? 'text-yellow-400' : 'text-gray-300'}`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Сэтгэгдэл */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Сэтгэгдэл (заавал биш)</label>
+              <textarea
+                rows={3}
+                className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Таны сэтгэгдэл..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={submitReview}
+                disabled={submittingReview}
+                className="flex-1 bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+              >
+                {submittingReview ? 'Илгээж байна...' : 'Үнэлэх'}
+              </button>
+              <button
+                onClick={() => setShowReviewModal(false)}
+                className="flex-1 bg-gray-300 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Цуцлах
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+    
   );
 }
