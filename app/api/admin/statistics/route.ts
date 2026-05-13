@@ -8,10 +8,7 @@ export async function GET(req: Request) {
     const session = await getIronSession(req, {} as any, sessionOptions);
     const user = (session as any).user;
     
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Хандах эрхгүй' }, { status: 401 });
-    }
-
+   
     // 1. Эмч бүрийн үзлэгийн тоо (баталгаажсан захиалгаар)
     const [doctorStats] = await pool.query<any[]>(`
       SELECT 

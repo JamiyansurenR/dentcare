@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   
   // Type assertion ашиглах
   const user = (session as any).user;
-  
+   console.log('me API - Session user:', user);
   if (user) {
     return NextResponse.json({ user: user });
   }
