@@ -19,9 +19,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Нууц үг хамгийн багадаа 6 тэмдэгт' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE users SET password = ? WHERE user_id = ?', [hashedPassword, userId]);
-
+    // bcrypt-ээр нууц үг шифрлэх
+   // const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    //await pool.query('UPDATE users SET password = ? WHERE user_id = ?', [hashedPassword, userId]);
+await pool.query('UPDATE users SET password = ? WHERE user_id = ?', [newPassword, userId]);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Reset password error:', error);
