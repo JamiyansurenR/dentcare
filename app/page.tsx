@@ -132,7 +132,7 @@ export default async function Home() {
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-3xl">
-                        
+                         👨‍⚕️
                       </div>
                     )}
                   </div>

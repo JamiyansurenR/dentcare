@@ -104,6 +104,11 @@ export default function AdminPage() {
   <h2 className="text-lg font-semibold text-gray-800 mt-3"> Үнэлгээ</h2>
   <p className="text-sm text-gray-500 mt-1">Эмчийн үнэлгээ, сэтгэгдлүүд</p>
 </Link>
+<Link href="/admin/users" className="block bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition group">
+  <UsersIcon className="w-10 h-10 text-teal-600 group-hover:scale-110 transition" />
+  <h2 className="text-lg font-semibold text-gray-800 mt-3"> Хэрэглэгчид</h2>
+  <p className="text-sm text-gray-500 mt-1">Хэрэглэгчийн жагсаалт, нууц үг сэргээх</p>
+</Link>
         </div>
       </div>
     </div>
