@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/app/lib/db';
+import bcrypt from 'bcryptjs';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/app/lib/auth';
-import bcrypt from 'bcryptjs';
+
 export async function POST(req: NextRequest) {
   try {
     const { username, password } = await req.json();
@@ -17,8 +18,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Нэвтрэх нэр эсвэл нууц үг буруу' }, { status: 401 });
     }
     
-    // bcrypt-г түр хасаад энгийн харьцуулалт хийх
-    if (password !== user.password) {
+    // bcrypt харьцуулалт
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return NextResponse.json({ error: 'Нэвтрэх нэр эсвэл нууц үг буруу' }, { status: 401 });
     }
     
