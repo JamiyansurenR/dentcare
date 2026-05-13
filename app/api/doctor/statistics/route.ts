@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Хандах эрхгүй' }, { status: 401 });
     }
 
-    // Эмчийн мэдээллийг авах
+    // Эмчийн doctor_id авах
     const [doctorRows] = await pool.query<any[]>(
       `SELECT d.doctor_id 
        FROM doctors d 
@@ -27,13 +27,13 @@ export async function GET(req: NextRequest) {
 
     const doctorId = doctorRows[0].doctor_id;
 
-    // Нийт захиалга
+    // 1. Нийт захиалга
     const [totalRows] = await pool.query<any[]>(
       'SELECT COUNT(*) as count FROM appointments WHERE doctor_id = ?',
       [doctorId]
     );
 
-    // Төлөвөөр захиалга
+    // 2. Төлөвөөр захиалга
     const [statusRows] = await pool.query<any[]>(
       `SELECT status, COUNT(*) as count 
        FROM appointments 
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       [doctorId]
     );
 
-    // Сарын статистик
+    // 3. Сарын статистик
     const [monthlyRows] = await pool.query<any[]>(
       `SELECT DATE_FORMAT(date, '%Y-%m') as month, COUNT(*) as count
        FROM appointments
@@ -52,7 +52,29 @@ export async function GET(req: NextRequest) {
       [doctorId]
     );
 
-    // Түгээмэл үйлчилгээ
+    // 4. Хамгийн ачаалалтай өдөр
+    const [busyDay] = await pool.query<any[]>(
+      `SELECT date, COUNT(*) as count
+       FROM appointments
+       WHERE doctor_id = ? AND status != 'cancelled'
+       GROUP BY date
+       ORDER BY count DESC
+       LIMIT 1`,
+      [doctorId]
+    );
+
+    // 5. Хамгийн ачаалалтай цаг
+    const [busyHour] = await pool.query<any[]>(
+      `SELECT HOUR(time) as hour, COUNT(*) as count
+       FROM appointments
+       WHERE doctor_id = ? AND status != 'cancelled'
+       GROUP BY HOUR(time)
+       ORDER BY count DESC
+       LIMIT 1`,
+      [doctorId]
+    );
+
+    // 6. Түгээмэл үйлчилгээ
     const [serviceRows] = await pool.query<any[]>(
       `SELECT s.name, COUNT(*) as count
        FROM appointments a
@@ -76,6 +98,8 @@ export async function GET(req: NextRequest) {
       cancelled: statusCounts.cancelled || 0,
       completed: statusCounts.completed || 0,
       monthlyStats: monthlyRows,
+      busyDay: busyDay[0] || null,
+      busyHour: busyHour[0] || null,
       topServices: serviceRows,
     });
   } catch (error: any) {
