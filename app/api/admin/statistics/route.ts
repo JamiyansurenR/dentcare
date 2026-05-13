@@ -1,21 +1,24 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/app/lib/db';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/app/lib/auth';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const session = await getIronSession(req, {} as any, sessionOptions);
     const user = (session as any).user;
     
-   
-    // 1. Эмч бүрийн үзлэгийн тоо (баталгаажсан захиалгаар)
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'Хандах эрхгүй' }, { status: 401 });
+    }
+
+    // 1. Эмч бүрийн үзлэгийн тоо
     const [doctorStats] = await pool.query<any[]>(`
       SELECT 
         d.doctor_id,
-        p.first_name,
-        p.last_name,
-        d.specialization,
+        ANY_VALUE(p.first_name) as first_name,
+        ANY_VALUE(p.last_name) as last_name,
+        ANY_VALUE(d.specialization) as specialization,
         COUNT(a.appointment_id) as total_appointments,
         SUM(CASE WHEN a.status = 'completed' THEN 1 ELSE 0 END) as completed_count
       FROM doctors d
@@ -24,8 +27,8 @@ export async function GET(req: Request) {
       GROUP BY d.doctor_id
       ORDER BY total_appointments DESC
     `);
-console.log('Doctor stats:', doctorStats);
-    // 2. Хамгийн ачаалалтай өдөр, цаг
+
+    // 2. Хамгийн ачаалалтай өдөр
     const [busyDay] = await pool.query<any[]>(`
       SELECT 
         date,
@@ -37,6 +40,7 @@ console.log('Doctor stats:', doctorStats);
       LIMIT 1
     `);
 
+    // 3. Хамгийн ачаалалтай цаг
     const [busyHour] = await pool.query<any[]>(`
       SELECT 
         HOUR(time) as hour,
@@ -48,7 +52,7 @@ console.log('Doctor stats:', doctorStats);
       LIMIT 1
     `);
 
-    // 3. Сарын статистик (энэ сарын захиалга)
+    // 4. Сарын статистик
     const [monthlyStats] = await pool.query<any[]>(`
       SELECT 
         DATE_FORMAT(date, '%Y-%m') as month,
