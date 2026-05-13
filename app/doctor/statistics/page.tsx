@@ -107,50 +107,6 @@ export default function AdminStatisticsPage() {
           </div>
         </div>
 
-        {/* Эмч бүрийн статистик */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
-          <div className="px-6 py-4 bg-gray-50 border-b">
-            <h2 className="font-semibold text-lg"> Эмч бүрийн үзлэгийн тоо</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-3 text-left">Эмч</th>
-                  <th className="px-4 py-3 text-left">Мэргэжил</th>
-                  <th className="px-4 py-3 text-center">Нийт захиалга</th>
-                  <th className="px-4 py-3 text-center">Дууссан</th>
-                  <th className="px-4 py-3 text-center">Гүйцэтгэл</th>
-                </tr>
-              </thead>
-              <tbody>
-                {doctorStats.map((doc) => {
-                  const percentage = getPercentage(doc.total_appointments, doc.completed_count);
-                  return (
-                    <tr key={doc.doctor_id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium">Dr. {doc.first_name} {doc.last_name}</td>
-                      <td className="px-4 py-3 text-gray-500">{doc.specialization}</td>
-                      <td className="px-4 py-3 text-center font-semibold">{doc.total_appointments}</td>
-                      <td className="px-4 py-3 text-center text-green-600">{doc.completed_count}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-teal-500 h-2 rounded-full transition-all duration-500"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                          <span className="text-xs font-medium text-gray-600 min-w-[40px]">{percentage}%</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         {/* Сарын статистик */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 bg-gray-50 border-b">
