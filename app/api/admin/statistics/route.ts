@@ -27,7 +27,7 @@ export async function GET(req: Request) {
       GROUP BY d.doctor_id
       ORDER BY total_appointments DESC
     `);
-
+console.log('Doctor stats:', doctorStats);
     // 2. Хамгийн ачаалалтай өдөр, цаг
     const [busyDay] = await pool.query<any[]>(`
       SELECT 

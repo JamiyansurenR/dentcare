@@ -11,7 +11,7 @@ export async function proxy(req: NextRequest) {
 
   console.log('Middleware - Path:', path);
   console.log('Middleware - User:', user);
-
+ console.log('Middleware - User role:', user?.role);
   // Админ хэсэг
   if (path.startsWith('/admin')) {
     if (!user || user.role !== 'admin') {
