@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import BackButton from '../../components/BackButton';
+
 import { 
   CalendarIcon, 
   ChartBarIcon, 
@@ -114,7 +114,7 @@ export default function DoctorDashboard() {
       
       <div className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
         <div className="container mx-auto px-4 py-6">
-            <BackButton fallbackUrl="/doctor/dashboard" />
+          
           <div className="flex items-center gap-3">
             <UserCircleIcon className="w-8 h-8" />
             <div>

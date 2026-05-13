@@ -1,4 +1,6 @@
 import pool from '../lib/db';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '@/app/lib/auth';
 import { UserGroupIcon, StarIcon } from '@heroicons/react/24/outline';
 import ToothIcon from '../components/ToothIcon';
 import BackButton from '../components/BackButton';
@@ -22,11 +24,10 @@ async function getDoctors(page: number = 1, limit: number = 9) {
   return { doctors, total: countRows[0]?.count || 0 };
 }
 
-export default async function DoctorsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }> | { page?: string };
+export default async function DoctorsPage({searchParams,}: { searchParams: Promise<{ page?: string }> | { page?: string };
 }) {
+   const session = await getIronSession({ headers: { cookie: '' } } as any, {} as any, sessionOptions);
+  const user = (session as any).user;
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   const limit = 9;
@@ -36,7 +37,7 @@ export default async function DoctorsPage({
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4">
-          <BackButton fallbackUrl="/" />
+            {!user && <BackButton fallbackUrl="/" />}
         {/* Гарчиг - Icon нэмсэн */}
         <div className="flex items-center gap-3 mb-2">
           <UserGroupIcon className="w-8 h-8 text-teal-600" />
