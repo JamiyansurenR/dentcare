@@ -1,66 +1,64 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { UserGroupIcon, StarIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import pool from '../lib/db';
+import { UserGroupIcon, StarIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon } from '@heroicons/react/24/solid';
 import BackButton from '../components/BackButton';
+import Link from 'next/link';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '../lib/auth';
+import { cookies } from 'next/headers';
 
-interface Doctor {
-  doctor_id: number;
-  first_name: string;
-  last_name: string;
-  specialization: string;
-  experience: number;
-  description: string;
-  rating: number;
-  avatar_url: string;
+async function getDoctors(page: number = 1, limit: number = 9) {
+  const offset = (page - 1) * limit;
+  const [rows] = await pool.query<any[]>(
+    `SELECT d.doctor_id, d.specialization, d.experience, d.description, d.rating,
+            p.first_name, p.last_name, p.avatar_url
+     FROM doctors d
+     JOIN profiles p ON d.profile_id = p.profile_id
+     WHERE d.active = true
+     ORDER BY d.doctor_id
+     LIMIT ? OFFSET ?`,
+    [limit, offset]
+  );
+  const [countRows] = await pool.query<any[]>('SELECT COUNT(*) as count FROM doctors WHERE active = true');
+  
+  const doctors = rows.map((d: any) => ({ 
+    ...d, 
+    rating: d.rating ? parseFloat(d.rating) : 0 
+  }));
+  return { doctors, total: countRows[0]?.count || 0 };
 }
 
-export default function DoctorsPage() {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [user, setUser] = useState<any>(null);
-  const searchParams = useSearchParams();
-  const page = parseInt(searchParams.get('page') || '1');
+export default async function DoctorsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }> | { page?: string };
+}) {
+  const params = await searchParams;
+  const page = parseInt(params.page || '1');
   const limit = 9;
-
-  useEffect(() => {
-    // Хэрэглэгчийн төлөвийг шалгах
-    fetch('/api/auth/me')
-      .then(res => res.json())
-      .then(data => setUser(data.user));
-
-    // Эмч нарыг татах
-    fetch(`/api/doctors?page=${page}&limit=${limit}`)
-      .then(res => res.json())
-      .then(data => {
-        setDoctors(data.doctors || []);
-        setTotal(data.total || 0);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [page]);
-
+  const { doctors, total } = await getDoctors(page, limit);
   const totalPages = Math.ceil(total / limit);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
-      </div>
+  // Session-ээс хэрэглэгчийн төлөвийг шалгах
+  let user = null;
+  try {
+    const session = await getIronSession(
+      { headers: { cookie: cookies().toString() } } as any,
+      {} as any,
+      sessionOptions
     );
+    user = (session as any).user;
+  } catch (error) {
+    // Session алдааг үл тоомсорлох
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4">
-        {/* Зөвхөн нэвтрээгүй үед буцах товч */}
+        {/* Зөвхөн нэвтрээгүй үед буцах товч харуулах */}
         {!user && <BackButton fallbackUrl="/" />}
 
+        {/* Гарчиг */}
         <div className="flex items-center gap-3 mb-2">
           <UserGroupIcon className="w-8 h-8 text-teal-600" />
           <h1 className="text-3xl font-bold text-gray-800">Бүх эмч нар</h1>
@@ -72,7 +70,7 @@ export default function DoctorsPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {doctors.map((doctor) => (
+              {doctors.map((doctor: any) => (
                 <div key={doctor.doctor_id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition">
                   <div className="bg-gradient-to-r from-teal-500 to-cyan-500 h-24 relative">
                     <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
@@ -94,6 +92,7 @@ export default function DoctorsPage() {
                     <p className="text-teal-600 text-sm">{doctor.specialization}</p>
                     <p className="text-gray-500 text-xs mt-2 line-clamp-2">{doctor.description}</p>
                     
+                    {/* Үнэлгээ */}
                     <div className="flex items-center justify-center mt-2 space-x-2">
                       <div className="flex items-center gap-1">
                         <StarIcon className="w-4 h-4 text-yellow-400" />
