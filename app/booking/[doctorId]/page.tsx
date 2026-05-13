@@ -100,13 +100,18 @@ export default function BookingPage() {
         alert('Захиалга амжилттай!');
         router.push('/dashboard');
       } else {
+       
+     if (data.error && data.error.includes('өөр захиалгатай')) {
+        alert('Та энэ цагт өөр захиалгатай байна. Нэг цагт зөвхөн нэг захиалга хийх боломжтой.');
+      } else {
         setError(data.error || 'Алдаа гарлаа');
       }
-    } catch (err) {
-      setError('Серверт холбогдоход алдаа гарлаа');
-    } finally {
-      setLoading(false);
     }
+  } catch (err) {
+    setError('Серверт холбогдоход алдаа гарлаа');
+  } finally {
+    setLoading(false);
+  }
   };
 
   if (!doctor) {

@@ -6,17 +6,15 @@ import { sessionOptions } from '@/app/lib/auth';
 export async function POST(req: NextRequest) {
   try {
     const session = await getIronSession(req, {} as any, sessionOptions);
-    
-    // Type assertion ашиглах
     const user = (session as any).user;
     
-    if (!user) {
-      return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
+    if (!user || user.role !== 'patient') {
+      return NextResponse.json({ error: 'Зөвхөн өвчтөн захиалга хийх боломжтой' }, { status: 401 });
     }
 
     const { doctorId, serviceId, scheduleId, date, time } = await req.json();
 
-    // Get patient_id from user_id
+    // Өвчтөний patient_id авах
     const [patientRows] = await pool.query<any[]>(
       `SELECT p.patient_id 
        FROM patients p 
@@ -30,6 +28,20 @@ export async function POST(req: NextRequest) {
     }
 
     const patientId = patientRows[0].patient_id;
+
+    //  НЭГ ӨВЧТӨН НЭГ ЦАГТ ЗӨВХӨН НЭГ ЗАХИАЛГА ХИЙХ БОЛОМЖТОЙ
+    const [existingAppointments] = await pool.query<any[]>(
+      `SELECT COUNT(*) as count 
+       FROM appointments 
+       WHERE patient_id = ? AND date = ? AND time = ? AND status != 'cancelled'`,
+      [patientId, date, time]
+    );
+
+    if (existingAppointments[0].count > 0) {
+      return NextResponse.json({ 
+        error: 'Та энэ цагт өөр захиалгатай байна. Нэг цагт зөвхөн нэг захиалга хийх боломжтой.' 
+      }, { status: 400 });
+    }
 
     const connection = await pool.getConnection();
     
