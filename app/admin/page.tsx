@@ -44,15 +44,6 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="container mx-auto">
-        {/* Буцах товч */}
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-teal-600 transition mb-4 group"
-          aria-label="Буцах"
-        >
-          <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Буцах</span>
-        </button>
 
         <div className="flex items-center gap-3 mb-6">
           <ChartBarIcon className="w-8 h-8 text-teal-600" />
