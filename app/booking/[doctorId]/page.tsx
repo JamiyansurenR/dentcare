@@ -182,7 +182,7 @@ export default function BookingPage() {
         {/* Step 2: Date selection */}
      
 {step === 2 && (
-  <div>
+   <div>
     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
       <CalendarIcon className="w-5 h-5 text-teal-600" />
       Огноо сонгох
@@ -194,9 +194,23 @@ export default function BookingPage() {
       min={new Date().toISOString().split('T')[0]}
       max={new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]}
       className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
-      aria-label="Огноо сонгох"
+aria-label="Огноо сонгох"
     />
-    {/* ... бусад код ... */}
+    <div className="flex gap-3 mt-6">
+      <button
+        onClick={() => setStep(1)}
+        className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition"
+      >
+        Буцах
+      </button>
+      <button
+        onClick={() => setStep(3)}
+        disabled={!selectedDate}
+        className="flex-1 bg-teal-600 text-white py-3 rounded-xl font-semibold hover:bg-teal-700 disabled:opacity-50 transition"
+      >
+        Үргэлжлүүлэх
+      </button>
+    </div>
   </div>
 )}
 

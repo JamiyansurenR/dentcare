@@ -11,7 +11,8 @@ import {
   CheckIcon,
   XMarkIcon,
   ClockIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 interface Appointment {
@@ -110,6 +111,7 @@ export default function DoctorDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
+      
       <div className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
         <div className="container mx-auto px-4 py-6">
             <BackButton fallbackUrl="/doctor/dashboard" />
