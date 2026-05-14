@@ -23,10 +23,15 @@ export default function AdminUsersPage() {
         return res.json();
       })
       .then(data => {
-        setUsers(data);
-        setLoading(false);
+        console.log('Users data:', data);
+      console.log('Is array:', Array.isArray(data));
+      setUsers(Array.isArray(data) ? data : []);
+      setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() =>{
+      setUsers([]);
+      setLoading(false);
+    });
   }, []);
 
   const resetPassword = async (userId: number, username: string) => {
@@ -64,7 +69,7 @@ export default function AdminUsersPage() {
           <span>Буцах</span>
         </button>
 
-        <h1 className="text-2xl font-bold mb-6">👥 Хэрэглэгчийн жагсаалт</h1>
+        <h1 className="text-2xl font-bold mb-6"> Хэрэглэгчийн жагсаалт</h1>
 
         <div className="bg-white rounded-xl shadow overflow-hidden">
           <div className="overflow-x-auto">
